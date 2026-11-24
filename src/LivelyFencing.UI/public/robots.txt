@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+# Internal back-office and client portal screens
+Disallow: /cq/
+Disallow: /portal/
+
+Sitemap: https://closingbellga.com/sitemap.xml

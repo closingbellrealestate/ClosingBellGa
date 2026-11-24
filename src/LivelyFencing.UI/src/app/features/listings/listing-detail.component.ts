@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { SeoService } from '../../core/services/seo.service';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -201,7 +202,7 @@ import { AuthService } from '../../core/services/auth.service';
         Listings on this website come from the FMLS IDX Compilation and may be held by brokerage firms other than the owner of this website. The listing brokerage is identified in any listing details. Information is deemed reliable but is not guaranteed. If you believe any FMLS Listing contains material that infringes your copyrighted work, please <a href="https://www.fmls.com/dmca" target="_blank" rel="noopener">click here</a> to review our DMCA policy and learn how to submit a takedown request. &copy; {{ currentYear }} FMLS.
       </div>
       <div class="broker-disclosure">
-        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
+        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16782066389">(678) 206-6389</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
         <span class="tech-entity">Technical Entity (FMLS Rule 13.8): <strong>Browning Cloud Solutions</strong> &mdash; <a href="https://browningcloud.com" target="_blank" rel="noopener">browningcloud.com</a> &bull; <a href="mailto:ethan&#64;browningcloud.com">ethan&#64;browningcloud.com</a></span>
       </div>
     </div>
@@ -340,6 +341,7 @@ export class ListingDetailComponent implements OnInit {
   auth = inject(AuthService);
   route = inject(ActivatedRoute);
   snack = inject(MatSnackBar);
+  private seo = inject(SeoService);
 
   currentYear = new Date().getFullYear();
   listing = signal<any>(null);
@@ -363,9 +365,32 @@ export class ListingDetailComponent implements OnInit {
       next: l => {
         this.listing.set(l);
         this.loading.set(false);
+        this.applySeo(l);
         if (this.isLoggedIn()) this.loadMyReaction(key);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.seo.set({ title: 'Listing Not Available', noindex: true });
+      }
+    });
+  }
+
+  /** Unique title / description per listing, e.g. "22 Main St, Dawsonville, GA 30534 – $450,000 | Closing Bell Real Estate". */
+  private applySeo(l: any) {
+    if (!l) { this.seo.set({ title: 'Listing Not Available', noindex: true }); return; }
+    const place = [l.unparsedAddress, l.city, [l.stateOrProvince, l.postalCode].filter(Boolean).join(' ')]
+      .filter(Boolean).join(', ');
+    const price = l.listPrice ? `$${Number(l.listPrice).toLocaleString('en-US')}` : '';
+    const facts = [
+      l.bedroomsTotal ? `${l.bedroomsTotal} bed` : '',
+      l.bathroomsTotalDecimal ? `${l.bathroomsTotalDecimal} bath` : '',
+      l.livingArea ? `${Number(l.livingArea).toLocaleString('en-US')} sq ft` : ''
+    ].filter(Boolean).join(', ');
+    const verb = this.isRental() ? 'for rent' : 'for sale';
+    this.seo.set({
+      title: [place || 'Home ' + verb, price].filter(Boolean).join(' – '),
+      description: `${facts ? facts + ' home' : 'Home'} ${verb}${place ? ' at ' + place : ''}${price ? ', listed at ' + price : ''}. ` +
+        'See photos and details, then call the Closing Bell Real Estate Team at 678-206-6389 to schedule a showing.'
     });
   }
 

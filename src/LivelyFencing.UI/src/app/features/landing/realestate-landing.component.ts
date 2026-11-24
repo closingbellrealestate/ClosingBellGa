@@ -258,7 +258,7 @@ import { TenantService } from '../../core/services/tenant.service';
         <p class="re-footer-tagline">{{ tenant.config.tagline }}</p>
         <p class="re-footer-brokerage">
           <strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull;
-          <a href="tel:+16784515205">(678) 451-5205</a> &bull;
+          <a href="tel:+16782066389">(678) 206-6389</a> &bull;
           <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a>
         </p>
         <p class="re-footer-tech">

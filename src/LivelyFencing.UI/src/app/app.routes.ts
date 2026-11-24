@@ -4,6 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
+    data: { seo: { title: 'Dawsonville & North Georgia Real Estate Agents' } },
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
   {
@@ -77,14 +78,17 @@ export const routes: Routes = [
   },
   {
     path: 'listings',
+    data: { seo: { title: 'Homes for Sale in Dawsonville, Dahlonega & North Georgia', description: 'Search homes for sale in Dawsonville, Dahlonega, Gainesville, Cumming and across North Georgia with the Closing Bell Real Estate Team at Willow Bend Properties. Call 678-206-6389.' } },
     loadComponent: () => import('./features/listings/listings-search.component').then(m => m.ListingsSearchComponent)
   },
   {
     path: 'listings/:key',
+    data: { seo: { dynamic: true } },
     loadComponent: () => import('./features/listings/listing-detail.component').then(m => m.ListingDetailComponent)
   },
   {
     path: 'lp/:slug',
+    data: { seo: { dynamic: true } },
     loadComponent: () => import('./features/lp/lp-page.component').then(m => m.LpPageComponent)
   },
   { path: 'unauthorized', loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent) },
@@ -118,5 +122,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/listings/my-listings.component').then(m => m.MyListingsComponent),
     canActivate: [authGuard(['Admin', 'FMLSApprover'])]
   },
-  { path: '**', redirectTo: '/cq/dashboard' }
+  { path: 'cq', redirectTo: '/cq/dashboard', pathMatch: 'full' },
+  {
+    path: '**',
+    data: { seo: { title: 'Page Not Found', noindex: true } },
+    loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
+  }
 ];

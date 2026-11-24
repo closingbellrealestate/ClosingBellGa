@@ -189,7 +189,7 @@ import { AuthService } from '../../core/services/auth.service';
         Information Deemed Reliable But Not Guaranteed. If you believe any FMLS Listing contains material that infringes your copyrighted work, please <a href="https://www.fmls.com/dmca" target="_blank" rel="noopener">click here</a> to review our DMCA policy and learn how to submit a takedown request. &copy; FMLS
       </div>
       <div class="broker-disclosure">
-        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
+        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16782066389">(678) 206-6389</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
         <span class="tech-entity">Technical Entity (FMLS Rule 13.8): <strong>Browning Cloud Solutions</strong> &mdash; <a href="https://browningcloud.com" target="_blank" rel="noopener">browningcloud.com</a> &bull; <a href="mailto:ethan&#64;browningcloud.com">ethan&#64;browningcloud.com</a></span>
       </div>
     </div>

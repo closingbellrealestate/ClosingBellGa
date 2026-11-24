@@ -22,6 +22,7 @@ import { AuthService } from './core/services/auth.service';
 import { TenantService } from './core/services/tenant.service';
 import { ThemeService } from './core/services/theme.service';
 import { UtmService } from './core/services/utm.service';
+import { SeoService } from './core/services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -225,6 +226,7 @@ export class AppComponent implements OnInit, OnDestroy {
   tenant = inject(TenantService);
   theme = inject(ThemeService);
   private utm = inject(UtmService);
+  private seo = inject(SeoService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private bp = inject(BreakpointObserver);
@@ -237,6 +239,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.theme.apply();
     // Capture UTM / ad attribution once so lead submissions can be tagged by campaign.
     this.utm.capture();
+    // Per-route <title>, description, canonical and robots tags.
+    this.seo.init();
     // Apply the tenant's Material theme class to <html>
     document.documentElement.classList.add(this.tenant.themeClass);
     this.auth.getMe().subscribe();

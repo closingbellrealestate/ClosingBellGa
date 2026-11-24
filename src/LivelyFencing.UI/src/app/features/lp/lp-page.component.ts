@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../core/services/seo.service';
 import { ApiService } from '../../core/services/api.service';
 import { UtmService } from '../../core/services/utm.service';
 import { LP_CONFIGS, LP_FALLBACK, LpConfig } from './lp-configs';
@@ -184,7 +184,7 @@ export class LpPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
   private utm = inject(UtmService);
-  private title = inject(Title);
+  private seo = inject(SeoService);
 
   config = signal<LpConfig>(LP_FALLBACK);
   heroStyle = computed(() => {
@@ -208,7 +208,7 @@ export class LpPageComponent implements OnInit {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     const config = LP_CONFIGS[slug] ?? LP_FALLBACK;
     this.config.set(config);
-    this.title.setTitle(config.pageTitle);
+    this.seo.set({ title: config.pageTitle.split(' · ')[0], description: config.subhead });
 
     const q = this.route.snapshot.queryParamMap;
     const key = q.get('listingKey')?.trim() || null;
