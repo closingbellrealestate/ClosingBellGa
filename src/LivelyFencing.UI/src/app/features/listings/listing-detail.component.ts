@@ -62,12 +62,16 @@ import { AuthService } from '../../core/services/auth.service';
       <div class="content-grid">
         <!-- Left: property details -->
         <div class="detail-main">
+          <div class="fmls-id">FMLS #{{ listing().listingId }}</div>
           <div class="price-row">
             <span class="listing-price">{{ listing().listPrice | currency:'USD':'symbol':'1.0-0' }}<span *ngIf="isRental()" class="per-mo">/mo</span></span>
             <span *ngIf="isRental()" class="rental-badge">For Rent</span>
           </div>
           <h1 class="listing-addr">{{ listing().unparsedAddress }}</h1>
           <p class="listing-loc">{{ listing().city }}, {{ listing().stateOrProvince }} {{ listing().postalCode }}</p>
+          <p class="listing-courtesy-top" *ngIf="listing().listOfficeName">
+            Listing Courtesy Of <strong>{{ listing().listOfficeName }}</strong>
+          </p>
 
           <div class="stats-grid">
             <div class="stat-box">
@@ -113,7 +117,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
 
           <div class="listing-id-row">
-            <span class="listing-id">MLS# {{ listing().listingId }}</span>
+            <span class="listing-id">FMLS #{{ listing().listingId }}</span>
             <span class="listing-office" *ngIf="listing().listOfficeName">Listing Courtesy Of {{ listing().listOfficeName }}</span>
             <span class="listing-agent-phone" *ngIf="listing().listAgentPhone">
               <a [href]="'tel:' + listing().listAgentPhone">{{ listing().listAgentPhone }}</a>
@@ -174,6 +178,22 @@ import { AuthService } from '../../core/services/auth.service';
               </a>
             </mat-card-content>
           </mat-card>
+
+          <!-- Agent tools: generate a trackable ad landing-page link -->
+          <mat-card class="adlink-card" *ngIf="auth.isInternal()">
+            <mat-card-header>
+              <mat-card-title>Marketing</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="adlink-text">
+                Create a Facebook/Instagram ad link that sends buyers to a landing page for this home and captures them as leads.
+              </p>
+              <button mat-flat-button color="primary" style="width:100%"
+                (click)="generateAdLink()">
+                <mat-icon>ads_click</mat-icon> Generate Ad Link
+              </button>
+            </mat-card-content>
+          </mat-card>
         </div>
       </div>
 
@@ -181,8 +201,8 @@ import { AuthService } from '../../core/services/auth.service';
         Listings on this website come from the FMLS IDX Compilation and may be held by brokerage firms other than the owner of this website. The listing brokerage is identified in any listing details. Information is deemed reliable but is not guaranteed. If you believe any FMLS Listing contains material that infringes your copyrighted work, please <a href="https://www.fmls.com/dmca" target="_blank" rel="noopener">click here</a> to review our DMCA policy and learn how to submit a takedown request. &copy; {{ currentYear }} FMLS.
       </div>
       <div class="broker-disclosure">
-        <strong>Willow Bend Properties</strong> &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a><br>
-        <span class="tech-entity">Technical contact responsible for this IDX display: Ethan Browning &mdash; <a href="mailto:browningethan23&#64;gmail.com">browningethan23&#64;gmail.com</a></span>
+        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
+        <span class="tech-entity">Technical Entity (FMLS Rule 13.8): <strong>Browning Cloud Solutions</strong> &mdash; <a href="https://browningcloud.com" target="_blank" rel="noopener">browningcloud.com</a> &bull; <a href="mailto:ethan&#64;browningcloud.com">ethan&#64;browningcloud.com</a></span>
       </div>
     </div>
 
@@ -245,6 +265,9 @@ import { AuthService } from '../../core/services/auth.service';
 
     .price-row { margin-bottom: 4px; }
     .listing-price { font-size: 36px; font-weight: 700; color: #1A3A2A; }
+    .fmls-id { font-size: 12px; font-weight: 700; color: #1A3A2A; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 8px; }
+    .listing-courtesy-top { font-size: 13px; color: #555; font-style: italic; margin: 8px 0 12px; }
+    .listing-courtesy-top strong { color: #222; font-style: normal; font-weight: 600; }
     .per-mo { font-size: 18px; font-weight: 500; color: #555; margin-left: 2px; }
     .rental-badge { display: inline-block; background: #2a6496; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; margin-left: 12px; vertical-align: middle; }
     .listing-addr { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
@@ -286,6 +309,10 @@ import { AuthService } from '../../core/services/auth.service';
     .saved-msg { color: #1A3A2A; font-size: 13px; margin-top: 8px; }
 
     .contact-text { color: #555; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+
+    .adlink-card { margin-top: 16px; }
+    .adlink-text { color: #555; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+    .adlink-card button mat-icon { margin-right: 6px; }
 
     .not-found { text-align: center; padding: 80px 20px; }
     .not-found mat-icon { font-size: 60px; width: 60px; height: 60px; color: #ccc; display: block; margin: 0 auto 16px; }
@@ -345,6 +372,28 @@ export class ListingDetailComponent implements OnInit {
   isLoggedIn() { return !!this.auth.currentUser; }
   isRental() { return this.listing()?.propertyType === 'Residential Lease'; }
 
+  async generateAdLink() {
+    const l = this.listing();
+    if (!l || typeof window === 'undefined') return;
+
+    const url = new URL(`/lp/${pickLpSlug(l)}`, window.location.origin);
+    url.searchParams.set('listingKey', l.listingKey);
+    url.searchParams.set('listingAddress', l.unparsedAddress ?? '');
+    if (l.listPrice) url.searchParams.set('listingPrice', String(Math.round(l.listPrice)));
+    url.searchParams.set('utm_source', 'meta');
+    url.searchParams.set('utm_medium', 'paid_social');
+    url.searchParams.set('utm_campaign', `listing-${l.listingKey}`);
+    const link = url.toString();
+
+    try {
+      await navigator.clipboard.writeText(link);
+      this.snack.open('Ad link copied to clipboard', 'Close', { duration: 4000 });
+    } catch {
+      // Clipboard blocked (e.g. some in-app browsers) — show the link so it can be copied manually.
+      this.snack.open(link, 'Close', { duration: 10000 });
+    }
+  }
+
   prevPhoto() {
     const len = this.listing()?.photos?.length ?? 0;
     if (len > 1) this.photoIdx.set((this.photoIdx() - 1 + len) % len);
@@ -399,4 +448,12 @@ export class ListingDetailComponent implements OnInit {
       this.pendingReaction = null;
     });
   }
+}
+
+/** Choose which landing-page template best fits a listing. */
+function pickLpSlug(l: any): string {
+  const type = `${l?.propertyType ?? ''} ${l?.propertySubType ?? ''}`.toLowerCase();
+  if (type.includes('land') || type.includes('lot') || type.includes('acre')) return 'land';
+  if ((l?.listPrice ?? 0) >= 1_000_000) return 'luxury';
+  return 'listing';
 }

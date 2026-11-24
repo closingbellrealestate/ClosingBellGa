@@ -21,6 +21,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { TenantService } from './core/services/tenant.service';
 import { ThemeService } from './core/services/theme.service';
+import { UtmService } from './core/services/utm.service';
 
 @Component({
   selector: 'app-root',
@@ -223,6 +224,7 @@ export class AppComponent implements OnInit, OnDestroy {
   auth = inject(AuthService);
   tenant = inject(TenantService);
   theme = inject(ThemeService);
+  private utm = inject(UtmService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private bp = inject(BreakpointObserver);
@@ -233,6 +235,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.theme.apply();
+    // Capture UTM / ad attribution once so lead submissions can be tagged by campaign.
+    this.utm.capture();
     // Apply the tenant's Material theme class to <html>
     document.documentElement.classList.add(this.tenant.themeClass);
     this.auth.getMe().subscribe();

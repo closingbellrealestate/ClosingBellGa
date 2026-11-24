@@ -83,6 +83,10 @@ export const routes: Routes = [
     path: 'listings/:key',
     loadComponent: () => import('./features/listings/listing-detail.component').then(m => m.ListingDetailComponent)
   },
+  {
+    path: 'lp/:slug',
+    loadComponent: () => import('./features/lp/lp-page.component').then(m => m.LpPageComponent)
+  },
   { path: 'unauthorized', loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent) },
   {
     path: 'cq/transactions',

@@ -256,6 +256,15 @@ import { TenantService } from '../../core/services/tenant.service';
           <span>{{ tenant.config.businessName }}</span>
         </div>
         <p class="re-footer-tagline">{{ tenant.config.tagline }}</p>
+        <p class="re-footer-brokerage">
+          <strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull;
+          <a href="tel:+16784515205">(678) 451-5205</a> &bull;
+          <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a>
+        </p>
+        <p class="re-footer-tech">
+          Technical Entity (FMLS Rule 13.8): <strong>Browning Cloud Solutions</strong> &mdash;
+          <a href="https://browningcloud.com" target="_blank" rel="noopener">browningcloud.com</a>
+        </p>
         <p class="re-footer-copy">&copy; {{ year }} {{ tenant.config.businessName }}. All rights reserved.</p>
       </footer>
     </div>
@@ -414,6 +423,14 @@ import { TenantService } from '../../core/services/tenant.service';
     .re-footer-brand mat-icon { color: #C9A96E; }
     .re-footer-brand span { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: .5px; }
     .re-footer-tagline { color: rgba(255,255,255,.4); font-size: 13px; margin: 0 0 12px; letter-spacing: .5px; }
+    .re-footer-brokerage { color: rgba(255,255,255,.7); font-size: 12px; margin: 0 0 6px; line-height: 1.7; }
+    .re-footer-brokerage strong { color: #fff; }
+    .re-footer-brokerage a { color: #C9A96E; text-decoration: none; }
+    .re-footer-brokerage a:hover { text-decoration: underline; }
+    .re-footer-tech { color: rgba(255,255,255,.4); font-size: 11px; margin: 0 0 14px; line-height: 1.7; }
+    .re-footer-tech strong { color: rgba(255,255,255,.65); }
+    .re-footer-tech a { color: #C9A96E; text-decoration: none; }
+    .re-footer-tech a:hover { text-decoration: underline; }
     .re-footer-copy { color: rgba(255,255,255,.25); font-size: 11px; margin: 0; letter-spacing: .5px; }
 
     @media (max-width: 768px) {

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: localhost:5000/lf-api:latest
+          image: localhost:5000/cb-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

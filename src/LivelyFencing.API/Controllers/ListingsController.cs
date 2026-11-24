@@ -72,14 +72,13 @@ public class ListingsController : ControllerBase
         string filter;
 
         if (t.All(char.IsDigit))
-            filter = $"(startswith(PostalCode, '{t}') or startswith(UnparsedAddress, '{t}')) and PropertyType ne 'Residential Lease' and StandardStatus eq 'Active' and InternetEntireListingDisplayYN ne false";
+            filter = $"(startswith(PostalCode, '{t}') or {BuildAddressFilter(t)}) and PropertyType ne 'Residential Lease' and {BuildStatusFilter(null)} and InternetEntireListingDisplayYN ne false";
         else if (char.IsDigit(t[0]))
         {
-            var norm = NormalizeAddress(t);
-            filter = $"contains(UnparsedAddress, '{norm}') and PropertyType ne 'Residential Lease' and StandardStatus eq 'Active' and InternetEntireListingDisplayYN ne false";
+            filter = $"({BuildAddressFilter(t)}) and PropertyType ne 'Residential Lease' and {BuildStatusFilter(null)} and InternetEntireListingDisplayYN ne false";
         }
         else
-            filter = $"startswith(City, '{t}') and PropertyType ne 'Residential Lease' and StandardStatus eq 'Active' and InternetEntireListingDisplayYN ne false and ListPrice gt 0";
+            filter = $"startswith(tolower(City), '{t.ToLower()}') and PropertyType ne 'Residential Lease' and {BuildStatusFilter(null)} and InternetEntireListingDisplayYN ne false and ListPrice gt 0";
 
         using var client = _httpFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -182,6 +181,10 @@ public class ListingsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(status))
             listings = listings.Where(l =>
                 l.StandardStatus.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+        else
+            listings = listings.Where(l =>
+                l.StandardStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ||
+                l.StandardStatus.Equals("Coming Soon", StringComparison.OrdinalIgnoreCase)).ToList();
         listings = sort switch
         {
             "price-desc" => listings.OrderByDescending(l => l.ListPrice).ToList(),
@@ -211,8 +214,8 @@ public class ListingsController : ControllerBase
 
         var filters = new List<string>
         {
-            // Default to Active when caller omits status
-            $"StandardStatus eq '{(string.IsNullOrWhiteSpace(status) ? "Active" : status.Trim())}'",
+            // Default public search to Active + Coming Soon so pre-market listings can surface.
+            BuildStatusFilter(status),
             "ListPrice gt 0",             // exclude test/null-price listings
             "InternetEntireListingDisplayYN ne false"  // FMLS Rule 13.1(b): respect opt-out
         };
@@ -226,10 +229,10 @@ public class ListingsController : ControllerBase
                 filters.Add($"startswith(PostalCode, '{c}')");
             else if (char.IsDigit(c[0]))
                 // Starts with a number followed by letters/spaces → street address
-                filters.Add($"contains(UnparsedAddress, '{NormalizeAddress(c)}')");
+                filters.Add(BuildAddressFilter(c));
             else
                 // Text → city name
-                filters.Add($"startswith(City, '{c}')");
+                filters.Add($"startswith(tolower(City), '{c.ToLower()}')");
         }
         else if (string.IsNullOrWhiteSpace(zip) && sort == "agent")
         {
@@ -296,8 +299,9 @@ public class ListingsController : ControllerBase
         string? propertyType, string? status, int page)
     {
         const int pageSize = 12;
-        var statusVal  = string.IsNullOrWhiteSpace(status) ? "Active" : status.Trim();
-        var baseFilter = $"StandardStatus eq '{statusVal}' and ListPrice gt 0 and InternetEntireListingDisplayYN ne false and (PostalCode eq '30028' or PostalCode eq '30534' or PostalCode eq '30533' or PostalCode eq '30506')";
+        var baseFilter = BuildStatusFilter(status)
+            + " and ListPrice gt 0 and InternetEntireListingDisplayYN ne false"
+            + " and (PostalCode eq '30028' or PostalCode eq '30534' or PostalCode eq '30533' or PostalCode eq '30506')";
 
         using var client = _httpFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -447,6 +451,27 @@ public class ListingsController : ControllerBase
                 words[i] = full;
         }
         return string.Join(" ", words);
+    }
+
+    private static string BuildStatusFilter(string? status)
+    {
+        if (!string.IsNullOrWhiteSpace(status))
+            return $"StandardStatus eq '{status.Trim().Replace("'", "''")}'";
+
+        return "(StandardStatus eq 'Active' or StandardStatus eq 'Coming Soon')";
+    }
+
+    private static string BuildAddressFilter(string input)
+    {
+        var raw = input.Trim().Replace("'", "''").ToLower();
+        var normalized = NormalizeAddress(input).ToLower();
+        var words = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var stemmed = words.Length > 2 ? string.Join(' ', words.Take(words.Length - 1)) : normalized;
+
+        return
+            $"(contains(tolower(UnparsedAddress), '{raw}') or " +
+            $"contains(tolower(UnparsedAddress), '{normalized}') or " +
+            $"contains(tolower(UnparsedAddress), '{stemmed}'))";
     }
 
     private static readonly JsonSerializerOptions _jsonOptions = new()

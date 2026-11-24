@@ -151,6 +151,7 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
           </div>
           <div class="card-body">
+            <div class="card-mls">FMLS #{{ l.listingId }}</div>
             <div class="card-price">
               {{ l.listPrice | currency:'USD':'symbol':'1.0-0' }}<span *ngIf="isRental(l)" class="per-mo">/mo</span>
             </div>
@@ -165,7 +166,6 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
             <div class="card-subtype">{{ l.propertySubType }}</div>
             <div class="card-office" *ngIf="l.listOfficeName">Listing Courtesy Of {{ l.listOfficeName }}</div>
-            <div class="card-mls">MLS# {{ l.listingId }}</div>
           </div>
         </div>
       </div>
@@ -189,8 +189,8 @@ import { AuthService } from '../../core/services/auth.service';
         Information Deemed Reliable But Not Guaranteed. If you believe any FMLS Listing contains material that infringes your copyrighted work, please <a href="https://www.fmls.com/dmca" target="_blank" rel="noopener">click here</a> to review our DMCA policy and learn how to submit a takedown request. &copy; FMLS
       </div>
       <div class="broker-disclosure">
-        <strong>Willow Bend Properties</strong> &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a><br>
-        <span class="tech-entity">Technical contact responsible for this IDX display: Ethan Browning &mdash; <a href="mailto:browningethan23&#64;gmail.com">browningethan23&#64;gmail.com</a></span>
+        <span class="brokerage-line"><strong>Willow Bend Properties</strong> &bull; Licensed Georgia Real Estate Brokerage &bull; <a href="tel:+16784515205">(678) 451-5205</a> &bull; <a href="mailto:willowbendpropertiesga&#64;gmail.com">willowbendpropertiesga&#64;gmail.com</a></span><br>
+        <span class="tech-entity">Technical Entity (FMLS Rule 13.8): <strong>Browning Cloud Solutions</strong> &mdash; <a href="https://browningcloud.com" target="_blank" rel="noopener">browningcloud.com</a> &bull; <a href="mailto:ethan&#64;browningcloud.com">ethan&#64;browningcloud.com</a></span>
       </div>
     </div>
   `,
@@ -300,7 +300,8 @@ import { AuthService } from '../../core/services/auth.service';
     .pagination span { color: #555; }
 
     .card-office { font-size: 11px; color: #777; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .card-mls { font-size: 10px; color: #aaa; margin-top: 2px; }
+    .card-mls { font-size: 11px; color: #1A3A2A; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+    .card-addr { font-size: 14px; color: #222; font-weight: 500; }
     .fmls-disclaimer { padding: 16px 0 0; margin-top: 24px; font-size: 11px; color: #888; line-height: 1.6; border-top: 1px solid #eee; }
     .fmls-disclaimer a { color: #777; }
 
@@ -362,10 +363,15 @@ export class ListingsSearchComponent implements OnInit {
     this.api.searchListings(params).subscribe({
       next: (res: any) => {
         const all = res.listings ?? [];
-        this.listings.set(this.hideRentals ? all.filter((l: any) => l.propertyType !== 'Residential Lease') : all);
-        this.total.set(res.total ?? 0);
-        this.loading.set(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (all.length === 0 && this.looksLikeAddress(this.city)) {
+          this.api.searchListings({ ...params, status: 'Coming Soon' }).subscribe({
+            next: (retry: any) => this.applySearchResults(retry),
+            error: () => this.loading.set(false),
+          });
+          return;
+        }
+
+        this.applySearchResults(res);
       },
       error: () => this.loading.set(false)
     });
@@ -398,6 +404,18 @@ export class ListingsSearchComponent implements OnInit {
     this.city = value;
     this.autoSuggestions.set([]);
     this.doSearch();
+  }
+
+  private applySearchResults(res: any) {
+    const all = res.listings ?? [];
+    this.listings.set(this.hideRentals ? all.filter((l: any) => l.propertyType !== 'Residential Lease') : all);
+    this.total.set(res.total ?? 0);
+    this.loading.set(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  private looksLikeAddress(value: string) {
+    return /^\s*\d/.test(value ?? '');
   }
 
 
