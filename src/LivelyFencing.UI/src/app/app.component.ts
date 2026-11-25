@@ -278,6 +278,7 @@ export class AppComponent implements OnInit, OnDestroy {
 // ── Inline Bug Report Dialog ─────────────────────────────────────────────────
 import { Component as NgComponent, Inject } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from '../environments/environment';
 
 @NgComponent({
   selector: 'app-bug-report-dialog',
@@ -367,7 +368,13 @@ export class BugReportDialogComponent {
       submitterEmail: this.data?.user?.email ?? 'crm@closingbellga.com',
     };
 
-    this.http.post('https://bcs-api.browningethan23.workers.dev/api/bugs/report', payload)
+    if (!environment.bugReportUrl) {
+      this.submitting = false;
+      this.error = 'Bug reporting is not configured.';
+      return;
+    }
+
+    this.http.post(environment.bugReportUrl, payload)
       .subscribe({
         next: () => {
           this.submitting = false;

@@ -4,8 +4,8 @@ using System.Text.Json;
 namespace LivelyFencing.API.Infrastructure;
 
 /// <summary>
-/// Catches unhandled exceptions, logs them, and submits a bug report to the
-/// BCS bug-tracking API automatically.
+/// Catches unhandled exceptions, logs them, and (optionally) submits a bug report
+/// to the endpoint configured at ErrorReporting:Url. If unset, errors are only logged.
 /// </summary>
 public class ErrorReportingMiddleware
 {
@@ -13,13 +13,15 @@ public class ErrorReportingMiddleware
     private readonly ILogger<ErrorReportingMiddleware> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    private const string BugApiUrl = "https://bcs-api.browningethan23.workers.dev/api/bugs/report";
+    private readonly string? _bugApiUrl;
 
     public ErrorReportingMiddleware(
         RequestDelegate next,
         ILogger<ErrorReportingMiddleware> logger,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
+        _bugApiUrl = configuration["ErrorReporting:Url"];
         _next = next;
         _logger = logger;
         _httpClientFactory = httpClientFactory;
@@ -48,7 +50,8 @@ public class ErrorReportingMiddleware
             var cfIp_       = context.Request.Headers["CF-Connecting-IP"].FirstOrDefault() ?? "(none)";
 
             // Fire-and-forget bug report — don't let reporting failure break the response
-            _ = Task.Run(() => ReportBugAsync(ex, method, path_, query_, traceId_, userId_, host_, contentType_, userAgent_, cfIp_));
+            if (!string.IsNullOrWhiteSpace(_bugApiUrl))
+                _ = Task.Run(() => ReportBugAsync(ex, method, path_, query_, traceId_, userId_, host_, contentType_, userAgent_, cfIp_));
 
             // Return 500 to caller
             if (!context.Response.HasStarted)
@@ -118,7 +121,7 @@ public class ErrorReportingMiddleware
 
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(10);
-            var response = await client.PostAsJsonAsync(BugApiUrl, payload);
+            var response = await client.PostAsJsonAsync(_bugApiUrl, payload);
 
             if (!response.IsSuccessStatusCode)
             {

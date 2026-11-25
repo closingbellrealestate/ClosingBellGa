@@ -22,7 +22,7 @@ appsettings.Local.json
 
 # Kubernetes secrets — never commit real secret values
 # (k8s secret YAML files contain placeholder values only)
-# k8s/**/secret.yaml   <- uncomment if you want to exclude them entirely
+k8s/**/secret.yaml
 
 # OS
 .DS_Store

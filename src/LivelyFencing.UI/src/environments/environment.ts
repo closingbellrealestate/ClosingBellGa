@@ -3,5 +3,7 @@ export const environment = {
   // Same-origin proxy via nginx (see docker/nginx.conf /api/ block).
   // This avoids cross-origin XHR which is unreliable in Facebook/Instagram
   // in-app WKWebView browsers due to storage partitioning and CF bot challenges.
-  apiUrl: '/api'
+  apiUrl: '/api',
+  // Optional endpoint for the in-app "Report a problem" dialog. Empty = disabled.
+  bugReportUrl: ''
 };
