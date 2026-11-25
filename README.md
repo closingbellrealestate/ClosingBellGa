@@ -12,6 +12,5 @@ Website, CRM back office and client portal for The Closing Bell Real Estate Team
 |---|---|
 | [AGENTS.md](AGENTS.md) | How the code is organized, its conventions and rules. Read this first, especially if you're using an AI assistant. |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Hosting, build, configuration and secrets, and the outside accounts the site depends on |
-| [docs/](docs/) | Feature proposals |
 
 `CLAUDE.md` points Claude Code to `AGENTS.md`. Most other AI tools read `AGENTS.md` directly.

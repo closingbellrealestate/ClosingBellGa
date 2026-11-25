@@ -46,7 +46,6 @@ estate. So:
 docker/            Dockerfile.api, Dockerfile.ui, nginx.conf (SPA routing + /api proxy)
 k8s/               api, ui, postgres, ollama, cloudflared manifests; secret.example.yaml templates
 scripts/           seed_email_templates.py, setup-local-registry.sh
-docs/              proposal-gamls-and-ad-links.md (GAMLS + ad link proposal)
 src/LivelyFencing.API/
   Controllers/     One controller per resource; request/response DTO records at the bottom of each file
   Data/AppDbContext.cs
