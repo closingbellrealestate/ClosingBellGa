@@ -54,7 +54,7 @@ No real secret values are stored in this repository. Templates are in
 | Setting (env var) | Purpose |
 |---|---|
 | `ConnectionStrings__DefaultConnection` | Postgres connection |
-| `Encryption__Key` | Encrypts sensitive fields at rest. **Must be the same key as the existing data.** A new key makes the stored data unreadable. |
+| `Encryption__Key` | Key for `EncryptionService`. Current code doesn't call it, but carry the existing value over so any previously encrypted data stays readable. |
 | `Cloudflare__TeamDomain`, `Cloudflare__Audience` | Validates Cloudflare Access logins for `/cq/` and `/portal/` |
 | `SendGrid__ApiKey` (+ `SendGrid__FromEmail`, `SendGrid__FromName`) | Outbound email |
 | `TC_WEBHOOK_SECRET` | Shared secret for the inbound transaction-email webhook (`TcEmailWebhookController`) |
